@@ -59,3 +59,10 @@ typings/
 
 # next.js build output
 .next
+
+# TypeScript build output
+lib/
+
+# Editor-specific (use .editorconfig instead)
+.idea
+.vscode

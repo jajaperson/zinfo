@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "removeComments": false,
+    "noLib": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es6",
+    "sourceMap": true,
+    "lib": ["es6"],
+    "outDir": "./lib",
+    "plugins": [{ "name": "typescript-tslint-plugin" }]
+  },
+  "exclude": ["node_modules", "**/*.spec.ts"],
+  "include": ["./src"]
+}
