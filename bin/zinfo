@@ -1,0 +1,92 @@
+#!/usr/bin/env node
+
+/**
+ * @license
+ * Copyright (c) 2018 James Jensen.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+const { negate, take, kebabCase, without, uniq } = require("lodash");
+const { zinfo, isZinfoOptionsType } = require("..");
+
+const argv = require("yargs")
+  .usage("$0 [args]")
+  .option("include", {
+    alias: "i",
+    describe: "Which data to print.",
+    type: "array",
+    default: [],
+    defaultDescription: "$ZINFO_DEFAULTS",
+  })
+  .option("exclude", {
+    alias: "e",
+    describe: "Data to not print",
+    type: "array",
+    default: [],
+    defaultDescription: "none",
+  })
+  .option("ignore-defaults", {
+    alias: "I",
+    describe: 'Ignore "$ZINFO_DEFAULTS"',
+    type: "boolean",
+    default: false,
+  })
+  .check(argv => {
+    const invalidOptions = [...argv.include, ...argv.exclude]
+      .map(kebabCase)
+      .filter(negate(isZinfoOptionsType));
+
+    if (invalidOptions.length <= 0) {
+      return true;
+    } else {
+      const plural = invalidOptions.length > 1;
+      throw new Error(
+        `${toSentence(invalidOptions)} ${plural ? "are" : "is"} not ${
+          plural ? "" : "a "
+        }valid option${plural ? "s" : ""}.`
+      );
+    }
+  })
+  .version()
+  .alias("version", "v")
+  .help()
+  .completion().argv;
+
+console.log(zinfo(resolveArgs(argv)));
+
+function resolveArgs(argv) {
+  return uniq(
+    without(
+      (process.env.ZINFO_DEFAULTS || "")
+        .split(" ")
+        .map(kebabCase)
+        .filter(isZinfoOptionsType),
+      ...argv.exclude.map(kebabCase)
+    ).concat(...argv.include.map(kebabCase))
+  );
+}
+
+function toSentence(array) {
+  return array.length > 1
+    ? take(array, array.length - 1)
+        .join(", ")
+        .concat(`, and ${array[array.length - 1]}`)
+    : array[0];
+}
