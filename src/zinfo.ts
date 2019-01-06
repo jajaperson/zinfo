@@ -22,17 +22,29 @@
  */
 
 import { dirname, resolve as resolvePath } from "path";
+import { uptime as sysUptime } from "os";
 import c from "chalk";
 
 /** Array of Zinfo Options */
-export const ZinfoOptions = ["cwd-path", "cwd-path-absolute"];
+export const zinfoOptions: ZinfoOptionsType[] = [
+  "cwd-path",
+  "cwd-path-absolute",
+  "node-v",
+  "uptime",
+];
 
 /** Zinfo Options Type */
-export type ZinfoOptionsType = "cwd-path" | "cwd-path-absolute";
+export type ZinfoOptionsType =
+  | "cwd-path"
+  | "cwd-path-absolute"
+  | "node-v"
+  | "uptime";
 
 /** Zinfo Options Type Guard */
 export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
-  return typeof arg !== "string" ? false : ZinfoOptions.indexOf(arg) > -1;
+  return typeof arg !== "string"
+    ? false
+    : zinfoOptions.indexOf(arg as ZinfoOptionsType) > -1;
 }
 
 /**
@@ -41,7 +53,7 @@ export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
  *
  * @param include - Which data to print.
  */
-export function zinfo(include: ZinfoOptionsType[]) {
+export async function zinfo(include: ZinfoOptionsType[]) {
   let zinfoString = "";
 
   if (include.indexOf("cwd-path") > -1) {
@@ -49,6 +61,12 @@ export function zinfo(include: ZinfoOptionsType[]) {
   }
   if (include.indexOf("cwd-path-absolute") > -1) {
     zinfoString += c.blue(process.cwd()) + "\n";
+  }
+  if (include.indexOf("node-v") > -1) {
+    zinfoString += c.green(`\u2B22 ${process.version.substring(1)}\n`);
+  }
+  if (include.indexOf("uptime") > -1) {
+    zinfoString += c.red(`U ${sysUptime()}`);
   }
 
   return zinfoString;
