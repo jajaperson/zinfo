@@ -24,7 +24,7 @@
  */
 
 const { negate, take, kebabCase, without, uniq } = require("lodash");
-const { zinfo, isZinfoOptionsType } = require("..");
+const { zinfo, isZinfoOptionsType, zinfoOptions } = require("..");
 
 const argv = require("yargs")
   .usage("$0 [args]")
@@ -45,6 +45,12 @@ const argv = require("yargs")
   .option("ignore-defaults", {
     alias: "I",
     describe: 'Ignore "$ZINFO_DEFAULTS"',
+    type: "boolean",
+    default: false,
+  })
+  .option("all", {
+    alias: "a",
+    describe: "Include all options",
     type: "boolean",
     default: false,
   })
@@ -69,18 +75,24 @@ const argv = require("yargs")
   .help()
   .completion().argv;
 
-console.log(zinfo(resolveArgs(argv)));
+outputZinfo(argv);
+
+async function outputZinfo(argv) {
+  console.log(await zinfo(resolveArgs(argv)));
+}
 
 function resolveArgs(argv) {
-  return uniq(
-    without(
-      (process.env.ZINFO_DEFAULTS || "")
-        .split(" ")
-        .map(kebabCase)
-        .filter(isZinfoOptionsType),
-      ...argv.exclude.map(kebabCase)
-    ).concat(...argv.include.map(kebabCase))
-  );
+  return argv.all
+    ? zinfoOptions
+    : uniq(
+        without(
+          (process.env.ZINFO_DEFAULTS || "")
+            .split(" ")
+            .map(kebabCase)
+            .filter(isZinfoOptionsType),
+          ...argv.exclude.map(kebabCase)
+        ).concat(...argv.include.map(kebabCase))
+      );
 }
 
 function toSentence(array) {
