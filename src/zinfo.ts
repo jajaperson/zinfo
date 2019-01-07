@@ -53,23 +53,23 @@ export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
  *
  * @param include - Which data to print.
  */
-export async function zinfo(include: ZinfoOptionsType[]) {
-  let zinfoString = "";
+export async function zinfo(include: ZinfoOptionsType[]): Promise<string> {
+  const zinfoArray: string[] = [];
 
   if (include.indexOf("cwd-path") > -1) {
-    zinfoString += c.blue(homeRelativePath(process.cwd())) + "\n";
+    zinfoArray.push(c.blue(homeRelativePath(process.cwd())));
   }
   if (include.indexOf("cwd-path-absolute") > -1) {
-    zinfoString += c.blue(process.cwd()) + "\n";
+    zinfoArray.push(c.blue(process.cwd()));
   }
   if (include.indexOf("node-v") > -1) {
-    zinfoString += c.green(`\u2B22 ${process.version.substring(1)}\n`);
+    zinfoArray.push(c.green(`\u2B22 ${process.version.substring(1)}`));
   }
   if (include.indexOf("uptime") > -1) {
-    zinfoString += c.red(`U ${sysUptime()}`);
+    zinfoArray.push(c.red(`U ${sysUptime()}`));
   }
 
-  return zinfoString;
+  return zinfoArray.join("\n");
 }
 
 /**
