@@ -68,6 +68,11 @@ const argv = require("yargs")
     default: Boolean(Number(process.env.ZINFO_NERDFONTS)),
     defaultDescription: "$ZINFO_NERDFONTS",
   })
+  .option("options", {
+    alias: "ls",
+    describe: "List available options.",
+    type: "boolean",
+  })
   .check(argv => {
     const invalidOptions = [...argv.include, ...argv.exclude]
       .map(kebabCase)
@@ -78,9 +83,11 @@ const argv = require("yargs")
     } else {
       const plural = invalidOptions.length > 1;
       throw new Error(
-        `${toSentence(invalidOptions)} ${plural ? "are" : "is"} not ${
-          plural ? "" : "a "
-        }valid option${plural ? "s" : ""}.`
+        `${toSentence(invalidOptions.map(i => `"${i}"`))} ${
+          plural ? "are" : "is"
+        } not ${plural ? "" : "a "}valid option${
+          plural ? "s" : ""
+        }. To see a list of valid options, type \`zinfo --options\`.`
       );
     }
   })
@@ -88,6 +95,13 @@ const argv = require("yargs")
   .alias("version", "v")
   .help()
   .completion().argv;
+
+if (argv.options) {
+  console.log(
+    `Valid options are:\n${zinfoOptions.map(i => `- ${i}`).join("\n")}`
+  );
+  process.exit(0);
+}
 
 outputZinfo(argv);
 
