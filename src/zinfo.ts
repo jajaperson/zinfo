@@ -106,7 +106,7 @@ export async function zinfo(
       )
     );
   }
-  if (include.indexOf("time-24")) {
+  if (include.indexOf("time-24") > -1) {
     zinfoArray.push(
       c.redBright(
         `${style.nerdFonts ? "\uf64f" : "T"} ${underline(
