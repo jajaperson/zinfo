@@ -23,26 +23,36 @@
 
 import { dirname, resolve as resolvePath } from "path";
 import { uptime as sysUptime } from "os";
+import * as moment from "moment";
 import c from "chalk";
 import { identity } from "lodash";
-import chalk from "chalk";
 
 /** Array of Zinfo Options */
 export const zinfoOptions: ZinfoOptionsType[] = [
   "cwd-path",
   "cwd-path-absolute",
+  "platform",
+  "time",
+  "time-24",
+  "date",
+  "date-time",
+  "date-time-24",
   "node-v",
   "uptime",
-  "platform",
 ];
 
 /** Zinfo Options Type */
 export type ZinfoOptionsType =
   | "cwd-path"
   | "cwd-path-absolute"
+  | "platform"
+  | "time"
+  | "time-24"
+  | "date"
+  | "date-time"
+  | "date-time-24"
   | "node-v"
-  | "uptime"
-  | "platform";
+  | "uptime";
 
 /** Zinfo Options Type Guard */
 export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
@@ -87,9 +97,58 @@ export async function zinfo(
       )
     );
   }
+  if (include.indexOf("time") > -1) {
+    zinfoArray.push(
+      c.redBright(
+        `${style.nerdFonts ? "\uf64f" : "T"} ${underline(
+          moment().format("h:mm:ss a")
+        )}`
+      )
+    );
+  }
+  if (include.indexOf("time-24")) {
+    zinfoArray.push(
+      c.redBright(
+        `${style.nerdFonts ? "\uf64f" : "T"} ${underline(
+          moment().format("H:mm:ss")
+        )}`
+      )
+    );
+  }
+  if (include.indexOf("date") > -1) {
+    zinfoArray.push(
+      c.redBright(
+        `${style.nerdFonts ? "\uf5ec" : "D"} ${moment().format(
+          "dddd, MMMM Do YYYY"
+        )}`
+      )
+    );
+  }
+  if (include.indexOf("date-time") > -1) {
+    zinfoArray.push(
+      c.redBright(
+        `${style.nerdFonts ? "\uf5ef" : "D"} ${moment().format(
+          "dddd, MMMM Do YYYY, h:mm:ss a"
+        )}`
+      )
+    );
+  }
+  if (include.indexOf("date-time-24") > -1) {
+    zinfoArray.push(
+      c.redBright(
+        `${style.nerdFonts ? "\uf5ef" : "D"} ${moment().format(
+          "dddd, MMMM Do YYYY, H:mm:ss"
+        )}`
+      )
+    );
+  }
   if (include.indexOf("node-v") > -1) {
     zinfoArray.push(
-      c.green(`\u2B22 ${underline(process.version.substring(1))}`)
+      c.green(
+        `${style.nerdFonts ? "\ue24f" : "\u2B22"} ${underline(
+          process.version.substring(1)
+        )}`
+      )
     );
   }
   if (include.indexOf("uptime") > -1) {
