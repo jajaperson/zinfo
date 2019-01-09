@@ -152,7 +152,9 @@ export async function zinfo(
     );
   }
   if (include.indexOf("uptime") > -1) {
-    zinfoArray.push(c.red(`U ${underline(sysUptime())}`));
+    zinfoArray.push(
+      c.red(`${style.nerdFonts ? "\ufa1e" : "U"} ${underline(sysUptime())}`)
+    );
   }
 
   return zinfoArray.join("\n");
