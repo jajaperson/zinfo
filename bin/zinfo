@@ -56,10 +56,17 @@ const argv = require("yargs")
   })
   .option("underline", {
     alias: "u",
-    describe: "Underline data (nut not symbols), excluding cwd-path(-absolute)",
+    describe: "Underline data (but not symbols), excluding cwd-path(-absolute)",
     type: "boolean",
     default: Boolean(Number(process.env.ZINFO_UNDERLINE_DATA)),
     defaultDescription: "$ZINFO_UNDERLINE_DATA",
+  })
+  .option("nerdfonts", {
+    alias: "nf",
+    describe: "Use NerdFont symbols",
+    type: "boolean",
+    default: Boolean(Number(process.env.ZINFO_NERDFONTS)),
+    defaultDescription: "$ZINFO_NERDFONTS",
   })
   .check(argv => {
     const invalidOptions = [...argv.include, ...argv.exclude]
@@ -86,7 +93,10 @@ outputZinfo(argv);
 
 async function outputZinfo(argv) {
   console.log(
-    await zinfo(resolveArgs(argv), { underlineData: argv.underline })
+    await zinfo(resolveArgs(argv), {
+      underlineData: argv.underline,
+      nerdFonts: argv.nerdfonts,
+    })
   );
 }
 

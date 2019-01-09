@@ -33,6 +33,7 @@ export const zinfoOptions: ZinfoOptionsType[] = [
   "cwd-path-absolute",
   "node-v",
   "uptime",
+  "platform",
 ];
 
 /** Zinfo Options Type */
@@ -40,7 +41,8 @@ export type ZinfoOptionsType =
   | "cwd-path"
   | "cwd-path-absolute"
   | "node-v"
-  | "uptime";
+  | "uptime"
+  | "platform";
 
 /** Zinfo Options Type Guard */
 export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
@@ -52,6 +54,7 @@ export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
 /** Zinfo Output Style Configoration */
 export interface ZinfoStyleInterface {
   underlineData: boolean;
+  nerdFonts: boolean;
 }
 
 /**
@@ -74,6 +77,15 @@ export async function zinfo(
   }
   if (include.indexOf("cwd-path-absolute") > -1) {
     zinfoArray.push(c.blue(process.cwd()));
+  }
+  if (include.indexOf("platform") > -1) {
+    zinfoArray.push(
+      c.yellow(
+        `${style.nerdFonts ? getOsSymbol() : "P"} ${underline(
+          process.platform
+        )}`
+      )
+    );
   }
   if (include.indexOf("node-v") > -1) {
     zinfoArray.push(
@@ -137,4 +149,31 @@ export function optionalStyle(
   option: boolean
 ): (str: any) => string {
   return str => (option ? style(str) : identity(str));
+}
+
+/**
+ * ## Os Symbol
+ * Returns a NerdFonts symbol for the operating system. Currently has an icon
+ * for MacOS, Windows and Linux (nothing more specific).
+ *
+ * @returns The symbol for your OS.
+ */
+export function getOsSymbol(): string {
+  switch (process.platform) {
+    case "darwin":
+      return "\uf179";
+      break;
+
+    case "linux":
+      return "\uf17c";
+      break;
+
+    case "win32":
+      return "\uf17a";
+      break;
+
+    default:
+      return "\uf109";
+      break;
+  }
 }
