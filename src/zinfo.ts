@@ -24,6 +24,8 @@
 import { dirname, resolve as resolvePath } from "path";
 import { uptime as sysUptime } from "os";
 import c from "chalk";
+import { identity } from "lodash";
+import chalk from "chalk";
 
 /** Array of Zinfo Options */
 export const zinfoOptions: ZinfoOptionsType[] = [
@@ -47,13 +49,24 @@ export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
     : zinfoOptions.indexOf(arg as ZinfoOptionsType) > -1;
 }
 
+/** Zinfo Output Style Configoration */
+export interface ZinfoStyleInterface {
+  underlineData: boolean;
+}
+
 /**
  * ## Zinfo
  * Returns stylized data about the current directory, system, and node.
  *
  * @param include - Which data to print.
  */
-export async function zinfo(include: ZinfoOptionsType[]): Promise<string> {
+export async function zinfo(
+  include: ZinfoOptionsType[],
+  style: ZinfoStyleInterface
+): Promise<string> {
+  // Optional styles
+  const underline = optionalStyle(c.underline, style.underlineData);
+
   const zinfoArray: string[] = [];
 
   if (include.indexOf("cwd-path") > -1) {
@@ -63,10 +76,12 @@ export async function zinfo(include: ZinfoOptionsType[]): Promise<string> {
     zinfoArray.push(c.blue(process.cwd()));
   }
   if (include.indexOf("node-v") > -1) {
-    zinfoArray.push(c.green(`\u2B22 ${process.version.substring(1)}`));
+    zinfoArray.push(
+      c.green(`\u2B22 ${underline(process.version.substring(1))}`)
+    );
   }
   if (include.indexOf("uptime") > -1) {
-    zinfoArray.push(c.red(`U ${sysUptime()}`));
+    zinfoArray.push(c.red(`U ${underline(sysUptime())}`));
   }
 
   return zinfoArray.join("\n");
@@ -81,6 +96,8 @@ export async function zinfo(include: ZinfoOptionsType[]): Promise<string> {
  * @param filePath - Path to be converted.
  * @returns The converted path.
  * @example
+ * import { homeRelativePath } from "zinfo";
+ *
  * console.log(process.cwd())
  * // => "/Users/johnny.appleseed/Documents"
  * console.log(homeRelativePath(process.cwd()))
@@ -96,4 +113,28 @@ export function homeRelativePath(filePath: string): string {
     : resolvedFilePath.startsWith(userParent)
     ? filePath.replace(userParent, "~")
     : filePath;
+}
+
+/**
+ * ## Optional Style
+ * Apply a style (like a chalk colour) to a string only if `option` is true.
+ *
+ * @param style - The style to use.
+ * @param option - The option that determines whether to use the style or not.
+ * @returns The altered style function.
+ * @example
+ * import { optionalStyle } from "zinfo";
+ * import * as chalk from "chalk";
+ *
+ * const colored = true;
+ *
+ * console.log(
+ *   optionalStyle(chalk.red, colored)("Red text.")
+ * );
+ */
+export function optionalStyle(
+  style: (str: any) => string,
+  option: boolean
+): (str: any) => string {
+  return str => (option ? style(str) : identity(str));
 }
