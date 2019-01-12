@@ -24,7 +24,13 @@
  */
 
 const { negate, take, kebabCase, without, uniq } = require("lodash");
-const { zinfo, isZinfoOptionsType, zinfoOptions } = require("..");
+
+const {
+  zinfo,
+  isZinfoOptionsType,
+  zinfoOptions,
+  zinfoOptionsDesc,
+} = require("..");
 
 const argv = require("yargs")
   .usage("$0 [args]")
@@ -98,7 +104,9 @@ const argv = require("yargs")
 
 if (argv.options) {
   console.log(
-    `Valid options are:\n${zinfoOptions.map(i => `- ${i}`).join("\n")}`
+    `Valid options are:\n${zinfoOptions
+      .map((o, i) => `- \`${o}\`: ${zinfoOptionsDesc[i]}`)
+      .join("\n")}`
   );
   process.exit(0);
 }

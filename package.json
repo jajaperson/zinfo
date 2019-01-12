@@ -38,9 +38,13 @@
     "yargs": "^12.0.5"
   },
   "devDependencies": {
+    "@types/execa": "^0.9.0",
+    "@types/fs-extra": "^5.0.4",
     "@types/lodash": "^4.14.119",
     "@types/node": "^10.12.18",
     "@types/yargs": "^12.0.5",
+    "execa": "^1.0.0",
+    "fs-extra": "^7.0.1",
     "prettier": "^1.15.3",
     "tslint": "^5.12.0",
     "tslint-config-prettier": "^1.17.0",

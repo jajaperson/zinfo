@@ -41,6 +41,23 @@ export const zinfoOptions: ZinfoOptionsType[] = [
   "uptime",
 ];
 
+/**
+ * ## Array of Zinfo Option Descriptions
+ * Index corresponds to the index in `zinfoOptions` of the option being described.
+ */
+export const zinfoOptionsDesc: string[] = [
+  "The current directory, in home-relative format.",
+  "The current directory's absolute path.",
+  "The platform being used.",
+  "The current time.",
+  "The current time, in 24-hour format.",
+  "The current date.",
+  "The current date and time.",
+  "The current date and time, in 24-hour format.",
+  "The current node version.",
+  "How long the system has been up, in milliseconds.",
+];
+
 /** Zinfo Options Type */
 export type ZinfoOptionsType =
   | "cwd-path"
