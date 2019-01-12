@@ -51,7 +51,7 @@ export const zinfoOptionsDesc: string[] = [
   "The current directory, in home-relative format.",
   "The current directory's absolute path.",
   "The platform being used.",
-  "user",
+  "The current user.",
   "The current time.",
   "The current time, in 24-hour format.",
   "The current date.",
