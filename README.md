@@ -14,7 +14,7 @@ Then, optionally add default options to your `.BASH_PROFILE` or `.zshrc` (you
 can see available options [below](#Options)).
 
 ```sh
-export ZINFO_DEFAULTS="cwd=path time-24 node-v"
+export ZINFO_DEFAULTS="cwd-path time-24 node-v"
 ```
 
 Finally, run the command.
