@@ -66,3 +66,6 @@ lib/
 # Editor-specific (use .editorconfig instead)
 .idea
 .vscode
+
+# Backup files
+README.md.bak
