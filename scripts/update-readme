@@ -67,6 +67,5 @@ ${zinfoOptionsDesc[i]}
   if (readMeMod !== readMe.toString()) {
     await fs.writeFile(`${readMePath}.bak`, readMe);
     await fs.writeFile(readMePath, readMeMod);
-    await execa("git", ["add", readMePath]);
   }
 })();
