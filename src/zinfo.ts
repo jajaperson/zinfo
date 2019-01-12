@@ -55,7 +55,7 @@ export const zinfoOptionsDesc: string[] = [
   "The current date and time.",
   "The current date and time, in 24-hour format.",
   "The current node version.",
-  "How long the system has been up, in milliseconds.",
+  "The system uptime.",
 ];
 
 /** Zinfo Options Type */
