@@ -40,8 +40,8 @@ Commands:
 Options:
   --include, -i          Which data to print. [array] [default: $ZINFO_DEFAULTS]
   --exclude, -e          Data to not print               [array] [default: none]
-  --ignore-defaults, -I  Ignore "$ZINFO_DEFAULTS"     [boolean] [default: false]
-  --all, -a              Include all options          [boolean] [default: false]
+  --ignore-defaults, -I  Ignore "$ZINFO_DEFAULTS"                      [boolean]
+  --all, -a              Include all options                           [boolean]
   --underline, -u        Underline data (but not symbols), excluding
                          cwd-path(-absolute)
                                       [boolean] [default: $ZINFO_UNDERLINE_DATA]
