@@ -60,7 +60,7 @@ const argv = require("yargs")
   })
   .option("underline", {
     alias: "u",
-    describe: "Underline data (but not symbols), excluding cwd-path(-absolute)",
+    describe: "Underline data (but not symbols)",
     type: "boolean",
     default: Boolean(Number(process.env.ZINFO_UNDERLINE_DATA)),
     defaultDescription: "$ZINFO_UNDERLINE_DATA",

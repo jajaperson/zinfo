@@ -104,10 +104,10 @@ export async function zinfo(
   const zinfoArray: string[] = [];
 
   if (include.indexOf("cwd-path") > -1) {
-    zinfoArray.push(c.blue(homeRelativePath(process.cwd())));
+    zinfoArray.push(c.blue(underline(homeRelativePath(process.cwd()))));
   }
   if (include.indexOf("cwd-path-absolute") > -1) {
-    zinfoArray.push(c.blue(process.cwd()));
+    zinfoArray.push(c.blue(underline(process.cwd())));
   }
   if (include.indexOf("platform") > -1) {
     zinfoArray.push(
@@ -148,8 +148,8 @@ export async function zinfo(
   if (include.indexOf("date") > -1) {
     zinfoArray.push(
       c.redBright(
-        `${style.nerdFonts ? "\uf5ec" : "D"} ${moment().format(
-          "dddd, MMMM Do YYYY"
+        `${style.nerdFonts ? "\uf5ec" : "D"} ${underline(
+          moment().format("dddd, MMMM Do YYYY")
         )}`
       )
     );
@@ -157,8 +157,8 @@ export async function zinfo(
   if (include.indexOf("date-time") > -1) {
     zinfoArray.push(
       c.redBright(
-        `${style.nerdFonts ? "\uf5ef" : "D"} ${moment().format(
-          "dddd, MMMM Do YYYY, h:mm:ss a"
+        `${style.nerdFonts ? "\uf5ef" : "D"} ${underline(
+          moment().format("dddd, MMMM Do YYYY, h:mm:ss a")
         )}`
       )
     );
@@ -166,8 +166,8 @@ export async function zinfo(
   if (include.indexOf("date-time-24") > -1) {
     zinfoArray.push(
       c.redBright(
-        `${style.nerdFonts ? "\uf5ef" : "D"} ${moment().format(
-          "dddd, MMMM Do YYYY, H:mm:ss"
+        `${style.nerdFonts ? "\uf5ef" : "D"} ${underline(
+          moment().format("dddd, MMMM Do YYYY, H:mm:ss")
         )}`
       )
     );
