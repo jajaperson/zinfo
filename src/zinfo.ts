@@ -22,7 +22,7 @@
  */
 
 import { dirname, resolve as resolvePath } from "path";
-import { uptime as sysUptime } from "os";
+import { uptime as sysUptime, userInfo } from "os";
 import * as moment from "moment";
 import "moment-duration-format";
 import c from "chalk";
@@ -33,6 +33,7 @@ export const zinfoOptions: ZinfoOptionsType[] = [
   "cwd-path",
   "cwd-path-absolute",
   "platform",
+  "user",
   "time",
   "time-24",
   "date",
@@ -50,6 +51,7 @@ export const zinfoOptionsDesc: string[] = [
   "The current directory, in home-relative format.",
   "The current directory's absolute path.",
   "The platform being used.",
+  "user",
   "The current time.",
   "The current time, in 24-hour format.",
   "The current date.",
@@ -64,6 +66,7 @@ export type ZinfoOptionsType =
   | "cwd-path"
   | "cwd-path-absolute"
   | "platform"
+  | "user"
   | "time"
   | "time-24"
   | "date"
@@ -111,6 +114,15 @@ export async function zinfo(
       c.yellow(
         `${style.nerdFonts ? getOsSymbol() : "P"} ${underline(
           process.platform
+        )}`
+      )
+    );
+  }
+  if (include.indexOf("user") > -1) {
+    zinfoArray.push(
+      c.greenBright(
+        `${style.nerdFonts ? "\uf841" : "\u2666"} ${underline(
+          userInfo().username
         )}`
       )
     );
@@ -200,7 +212,7 @@ export async function zinfo(
  */
 export function homeRelativePath(filePath: string): string {
   const resolvedFilePath = resolvePath(filePath);
-  const homeDir = process.env.HOME;
+  const homeDir = userInfo().homedir;
   const userParent = dirname(homeDir) + "/";
 
   return resolvedFilePath.startsWith(homeDir)
