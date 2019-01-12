@@ -99,6 +99,6 @@ The current node version.
 
 ### `uptime`
 
-The system uptime.
+How long the system has been up.
 
 <!-- END:options -->

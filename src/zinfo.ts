@@ -24,6 +24,7 @@
 import { dirname, resolve as resolvePath } from "path";
 import { uptime as sysUptime } from "os";
 import * as moment from "moment";
+import "moment-duration-format";
 import c from "chalk";
 import { identity } from "lodash";
 
@@ -55,7 +56,7 @@ export const zinfoOptionsDesc: string[] = [
   "The current date and time.",
   "The current date and time, in 24-hour format.",
   "The current node version.",
-  "The system uptime.",
+  "How long the system has been up.",
 ];
 
 /** Zinfo Options Type */
@@ -170,7 +171,11 @@ export async function zinfo(
   }
   if (include.indexOf("uptime") > -1) {
     zinfoArray.push(
-      c.red(`${style.nerdFonts ? "\ufa1e" : "U"} ${underline(sysUptime())}`)
+      c.red(
+        `${style.nerdFonts ? "\uf55d" : "U"} ${underline(
+          moment.duration(sysUptime(), "seconds").format()
+        )}`
+      )
     );
   }
 
