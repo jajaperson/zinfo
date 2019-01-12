@@ -1,4 +1,4 @@
-# zinfo
+# zinfo [![NPM](https://img.shields.io/npm/v/zinfo-logger.svg)](https://npmjs.com/package/zinfo-logger) [![License](https://img.shields.io/npm/l/zinfo-logger.svg)](https://npmjs.com/package/zinfo-logger)
 
 Quickly get information about the current directory, system, and node.
 
