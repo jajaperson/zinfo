@@ -22,7 +22,7 @@ Finally, run the command.
 ```sh
 $ zinfo
 ~/Desktop/GitHub/zinfo
-T 9:23:55
+T 13:30:55
 ⬢ 11.6.0
 ```
 
