@@ -74,7 +74,7 @@ The platform being used.
 
 ### `user`
 
-user
+The current user.
 
 ### `time`
 
