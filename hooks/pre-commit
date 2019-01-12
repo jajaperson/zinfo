@@ -53,8 +53,6 @@ ${zinfoOptionsDesc[i]}
   const readMePath = path.join(__dirname, "../README.md");
   const readMe = await fs.readFile(readMePath);
 
-  await fs.writeFile(`${readMePath}.bak`, readMe);
-
   const readMeMod = readMe
     .toString()
     .replace(
@@ -66,7 +64,9 @@ ${zinfoOptionsDesc[i]}
       optionsTemplate()
     );
 
-  await fs.writeFile(readMePath, readMeMod);
-
-  await execa("git", ["add", readMePath]);
+  if (readMeMod !== readMe.toString()) {
+    await fs.writeFile(`${readMePath}.bak`, readMe);
+    await fs.writeFile(readMePath, readMeMod);
+    await execa("git", ["add", readMePath]);
+  }
 })();
