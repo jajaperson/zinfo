@@ -119,7 +119,7 @@ function resolveArgs(argv) {
     ? zinfoOptions
     : uniq(
         without(
-          (process.env.ZINFO_DEFAULTS || "")
+          ((!argv["ignore-defaults"] && process.env.ZINFO_DEFAULTS) || "")
             .split(" ")
             .map(kebabCase)
             .filter(isZinfoOptionsType),
