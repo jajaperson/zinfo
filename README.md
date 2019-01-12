@@ -42,8 +42,7 @@ Options:
   --exclude, -e          Data to not print               [array] [default: none]
   --ignore-defaults, -I  Ignore "$ZINFO_DEFAULTS"                      [boolean]
   --all, -a              Include all options                           [boolean]
-  --underline, -u        Underline data (but not symbols), excluding
-                         cwd-path(-absolute)
+  --underline, -u        Underline data (but not symbols)
                                       [boolean] [default: $ZINFO_UNDERLINE_DATA]
   --nerdfonts, --nf      Use NerdFont symbols
                                            [boolean] [default: $ZINFO_NERDFONTS]
@@ -72,6 +71,10 @@ The current directory's absolute path.
 ### `platform`
 
 The platform being used.
+
+### `user`
+
+user
 
 ### `time`
 
