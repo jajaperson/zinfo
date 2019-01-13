@@ -107,7 +107,7 @@ if (argv.options) {
         .map((o, i) =>
           `- \`${o}\`: ${zinfoOptionsDesc[i]}`
             .concat("\n")
-            .split(/(?![^\n]{1,71}$)([^\n]{1,71})\s/g)
+            .split(/(?![^\n]{1,69}$)([^\n]{1,69})\s/g)
             .filter((_, i) => i % 2 === 1)
             .map((s, i) => (i > 0 ? `  ${s}` : s))
             .join("\n")
