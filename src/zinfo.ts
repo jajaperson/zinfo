@@ -21,9 +21,13 @@
  * SOFTWARE.
  */
 
-import { dirname, resolve as resolvePath } from "path";
+import { dirname, resolve as resolvePath, join as joinPath } from "path";
 import { uptime as sysUptime, userInfo } from "os";
+
+import * as execa from "execa";
 import * as moment from "moment";
+import { pathExists } from "fs-extra";
+import * as globby from "globby";
 import "moment-duration-format";
 import c from "chalk";
 import { identity } from "lodash";
@@ -32,6 +36,7 @@ import { identity } from "lodash";
 export const zinfoOptions: ZinfoOptionsType[] = [
   "cwd-path",
   "cwd-path-absolute",
+  "git-info",
   "platform",
   "user",
   "time",
@@ -50,6 +55,7 @@ export const zinfoOptions: ZinfoOptionsType[] = [
 export const zinfoOptionsDesc: string[] = [
   "The current directory, in home-relative format.",
   "The current directory's absolute path.",
+  "Information about the current directory's git, if the current directory is a git repository.",
   "The platform being used.",
   "The current user.",
   "The current time.",
@@ -65,6 +71,7 @@ export const zinfoOptionsDesc: string[] = [
 export type ZinfoOptionsType =
   | "cwd-path"
   | "cwd-path-absolute"
+  | "git-info"
   | "platform"
   | "user"
   | "time"
@@ -108,6 +115,21 @@ export async function zinfo(
   }
   if (include.indexOf("cwd-path-absolute") > -1) {
     zinfoArray.push(c.blue(underline(process.cwd())));
+  }
+  if (include.indexOf("git-info") > -1) {
+    const isGitRepository = await pathExists(
+      joinPath(process.cwd(), "./.git/index")
+    );
+
+    if (isGitRepository) {
+      const repo = await gitStat(process.cwd());
+
+      zinfoArray.push(
+        `${c.magentaBright(repo.branch + (repo.dirty ? "*" : ""))} ${c.cyan(
+          (repo.ahead ? "\u21E1" : "") + (repo.behind ? "\u21E3" : "")
+        )}`
+      );
+    }
   }
   if (include.indexOf("platform") > -1) {
     zinfoArray.push(
@@ -240,10 +262,10 @@ export function homeRelativePath(filePath: string): string {
  * );
  */
 export function optionalStyle(
-  style: (str: any) => string,
+  style: (...str: any[]) => string,
   option: boolean
-): (str: any) => string {
-  return str => (option ? style(str) : identity(str));
+): (...str: any[]) => string {
+  return (...str) => (option ? style(str) : identity(str.join(" ")));
 }
 
 /**
@@ -270,5 +292,78 @@ export function getOsSymbol(): string {
     default:
       return "\uf109";
       break;
+  }
+}
+
+/** Git Stat Interface */
+export interface GitStatInterface {
+  /** Current branch */
+  branch: string;
+  /** Whether the selected branch is dirty */
+  dirty: boolean;
+  /** How many commits ahead of `origin` the local repository is. */
+  ahead: number;
+  /** How many commit behind `origin` the local repository is. */
+  behind: number;
+  /** Whether the repository is empty of commits. */
+  fresh?: boolean;
+}
+
+/**
+ * ## Git Stat
+ * Get information about a repository.
+ *
+ * Gives information about the following:
+ * - The current branch of the repository
+ * - Whether the selected branch is dirty
+ * - How many commits ahead of `origin` the local repository is.
+ * - How many commit behind `origin` the local repository is.
+ *
+ * @param repository - The path to the repository to get information about.
+ */
+export async function gitStat(repository: string): Promise<GitStatInterface> {
+  if (await pathExists(joinPath(repository, "./.git/HEAD"))) {
+    const hasOrigin =
+      (await execa.stdout("git", ["remote"])).search("origin") > -1;
+
+    if (await pathExists(joinPath(repository, "./.git/index"))) {
+      const branch = await execa.stdout("git", [
+        "rev-parse",
+        "--abbrev-ref",
+        "HEAD",
+      ]);
+      const dirty =
+        (await execa.stdout("git", ["status", "--porcelain"])).length > 0;
+      const ahead = hasOrigin
+        ? Number(
+            await execa.stdout("git", [
+              "rev-list",
+              "--left-only",
+              "--count",
+              `${branch}...origin/${branch}`,
+            ])
+          )
+        : 0;
+      const behind = hasOrigin
+        ? Number(
+            await execa.stdout("git", [
+              "rev-list",
+              "--right-only",
+              "--count",
+              `${branch}...origin/${branch}`,
+            ])
+          )
+        : 0;
+      return { branch, dirty, ahead, behind };
+    } else {
+      const branch = "master";
+      const dirty = (await globby(["*", "!.git"])).length > 0;
+      const ahead = 0;
+      const behind = 0; // TODO: Check if is behind origin.
+
+      return { branch, dirty, ahead, behind, fresh: true };
+    }
+  } else {
+    throw new Error(`${repository} is not a git repository.`);
   }
 }
