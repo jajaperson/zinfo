@@ -7,7 +7,10 @@ Quickly get information about the current directory, system, and node.
 First, install `zinfo-logger` globally.
 
 ```sh
+# NPM
 $ npm install -g zinfo-logger
+# Yarn
+$ yarn global add zinfo-logger
 ```
 
 Then, optionally add default options to your `.BASH_PROFILE` or `.zshrc` (you
