@@ -32,11 +32,34 @@ import "moment-duration-format";
 import c from "chalk";
 import { identity } from "lodash";
 
+/** Zinfo Options Type */
+export type ZinfoOptionsType =
+  | "cwd-path"
+  | "cwd-path-absolute"
+  | "git-overview"
+  | "git-branch"
+  | "git-last-commit"
+  | "git-ahead"
+  | "git-behind"
+  | "platform"
+  | "user"
+  | "time"
+  | "time-24"
+  | "date"
+  | "date-time"
+  | "date-time-24"
+  | "node-v"
+  | "uptime";
+
 /** Array of Zinfo Options */
 export const zinfoOptions: ZinfoOptionsType[] = [
   "cwd-path",
   "cwd-path-absolute",
-  "git-info",
+  "git-overview",
+  "git-branch",
+  "git-last-commit",
+  "git-ahead",
+  "git-behind",
   "platform",
   "user",
   "time",
@@ -55,7 +78,11 @@ export const zinfoOptions: ZinfoOptionsType[] = [
 export const zinfoOptionsDesc: string[] = [
   "The current directory, in home-relative format.",
   "The current directory's absolute path.",
-  "Information about the current directory's git, if the current directory is a git repository.",
+  "Information about the current directory's git, if the current directory is a git repository. `*` means the repository is dirty, and an upwards arrow (`\u21E1`) is displayed if there are commits to push, a downwards arrow (`\u21E3`) is displayed if there are commits on `origin` to pull.",
+  "The current git branch.",
+  "The last commit in the local repository.",
+  "The number of commits ahead of origin the local repository is.",
+  "The number of commits behind origin the local repository is.",
   "The platform being used.",
   "The current user.",
   "The current time.",
@@ -66,21 +93,6 @@ export const zinfoOptionsDesc: string[] = [
   "The current node version.",
   "How long the system has been up.",
 ];
-
-/** Zinfo Options Type */
-export type ZinfoOptionsType =
-  | "cwd-path"
-  | "cwd-path-absolute"
-  | "git-info"
-  | "platform"
-  | "user"
-  | "time"
-  | "time-24"
-  | "date"
-  | "date-time"
-  | "date-time-24"
-  | "node-v"
-  | "uptime";
 
 /** Zinfo Options Type Guard */
 export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
@@ -116,20 +128,67 @@ export async function zinfo(
   if (include.indexOf("cwd-path-absolute") > -1) {
     zinfoArray.push(c.blue(underline(process.cwd())));
   }
-  if (include.indexOf("git-info") > -1) {
-    const isGitRepository = await pathExists(
-      joinPath(process.cwd(), "./.git/index")
-    );
-
-    if (isGitRepository) {
+  if (include.indexOf("git-overview") > -1) {
+    if (await isGitRepository(process.cwd())) {
       const repo = await gitStat(process.cwd());
 
       zinfoArray.push(
-        `${c.magentaBright(repo.branch + (repo.dirty ? "*" : ""))} ${c.cyan(
-          (repo.ahead ? "\u21E1" : "") + (repo.behind ? "\u21E3" : "")
-        )}`
+        c.red(
+          `${style.nerdFonts ? "\ue0a0" : ">"} ${underline(
+            `${repo.branch + (repo.dirty ? c.dim("*") : "")} ${c.cyan(
+              (repo.ahead ? "\u21E1" : "") + (repo.behind ? "\u21E3" : "")
+            )}`
+          )}`
+        )
       );
     }
+  }
+  if (include.indexOf("git-branch") > -1) {
+    if (await isGitRepository(process.cwd())) {
+      const { branch } = await gitStat(process.cwd());
+
+      zinfoArray.push(
+        c.red(`${style.nerdFonts ? "\ue0a0" : ">"} ${underline(branch)}`)
+      );
+    }
+  }
+  if (include.indexOf("git-last-commit") > -1) {
+    const [shortHash, subject] = (await execa.stdout("git", [
+      "--no-pager",
+      "log",
+      "-1",
+      "--format=%h:%s",
+    ])).split(":");
+
+    zinfoArray.push(
+      c.red(
+        `${style.nerdFonts ? "\uf417" : "\u29B5"} ${underline(
+          `${subject} ${c.dim.italic(shortHash)}`
+        )}`
+      )
+    );
+  }
+  if (include.indexOf("git-ahead") > -1) {
+    const { ahead } = await gitStat(process.cwd());
+
+    zinfoArray.push(
+      c.red(
+        `${style.nerdFonts ? "\uf403" : "%"} ${underline(
+          `${ahead} commits ahead of origin`
+        )}`
+      )
+    );
+  }
+  if (include.indexOf("git-behind") > -1) {
+    const { behind } = await gitStat(process.cwd());
+
+    zinfoArray.push(
+      c.red(
+        `${style.nerdFonts ? "\uf404" : "!"} ${underline(
+          `${behind} commits behind origin`
+        )}`
+      )
+    );
   }
   if (include.indexOf("platform") > -1) {
     zinfoArray.push(
@@ -205,7 +264,7 @@ export async function zinfo(
   }
   if (include.indexOf("uptime") > -1) {
     zinfoArray.push(
-      c.red(
+      c.magentaBright(
         `${style.nerdFonts ? "\uf55d" : "U"} ${underline(
           moment.duration(sysUptime(), "seconds").format()
         )}`
@@ -295,6 +354,16 @@ export function getOsSymbol(): string {
   }
 }
 
+/**
+ * ## Is Git Repository
+ * Returns whether the specified directory is a git repository.
+ *
+ * @param directory - The directory to check
+ */
+export async function isGitRepository(directory): Promise<boolean> {
+  return await pathExists(joinPath(directory, "./.git/HEAD"));
+}
+
 /** Git Stat Interface */
 export interface GitStatInterface {
   /** Current branch */
@@ -322,7 +391,7 @@ export interface GitStatInterface {
  * @param repository - The path to the repository to get information about.
  */
 export async function gitStat(repository: string): Promise<GitStatInterface> {
-  if (await pathExists(joinPath(repository, "./.git/HEAD"))) {
+  if (await isGitRepository(repository)) {
     const hasOrigin =
       (await execa.stdout("git", ["remote"])).search("origin") > -1;
 
