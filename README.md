@@ -71,6 +71,26 @@ The current directory, in home-relative format.
 
 The current directory's absolute path.
 
+### `git-overview`
+
+Information about the current directory's git, if the current directory is a git repository. `*` means the repository is dirty, and an upwards arrow (`⇡`) is displayed if there are commits to push, a downwards arrow (`⇣`) is displayed if there are commits on `origin` to pull.
+
+### `git-branch`
+
+The current git branch.
+
+### `git-last-commit`
+
+The last commit in the local repository.
+
+### `git-ahead`
+
+The number of commits ahead of origin the local repository is.
+
+### `git-behind`
+
+The number of commits behind origin the local repository is.
+
 ### `platform`
 
 The platform being used.
