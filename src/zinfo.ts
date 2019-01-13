@@ -428,7 +428,16 @@ export async function gitStat(repository: string): Promise<GitStatInterface> {
       const branch = "master";
       const dirty = (await globby(["*", "!.git"])).length > 0;
       const ahead = 0;
-      const behind = 0; // TODO: Check if is behind origin.
+      const behind = hasOrigin
+        ? Number(
+            await execa.stdout("git", [
+              "rev-list",
+              "--left-only",
+              "--count",
+              `${branch}...origin/${branch}`,
+            ])
+          )
+        : 0;
 
       return { branch, dirty, ahead, behind, fresh: true };
     }
