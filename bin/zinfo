@@ -113,10 +113,10 @@ outputZinfo(argv);
 
 async function outputZinfo(argv) {
   console.log(
-    await zinfo(resolveArgs(argv), {
+    (await zinfo(resolveArgs(argv), {
       underlineData: argv.underline,
       nerdFonts: argv.nerdfonts,
-    })
+    })).join("\n")
   );
 }
 

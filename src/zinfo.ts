@@ -97,7 +97,7 @@ export interface ZinfoStyleInterface {
 export async function zinfo(
   include: ZinfoOptionsType[],
   style: ZinfoStyleInterface
-): Promise<string> {
+): Promise<string[]> {
   // Optional styles
   const underline = optionalStyle(c.underline, style.underlineData);
 
@@ -191,7 +191,7 @@ export async function zinfo(
     );
   }
 
-  return zinfoArray.join("\n");
+  return zinfoArray;
 }
 
 /**
