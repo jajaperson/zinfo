@@ -41,17 +41,20 @@ Commands:
   zinfo completion  generate bash completion script
 
 Options:
-  --include, -i          Which data to print. [array] [default: $ZINFO_DEFAULTS]
-  --exclude, -e          Data to not print               [array] [default: none]
-  --ignore-defaults, -I  Ignore "$ZINFO_DEFAULTS"                      [boolean]
-  --all, -a              Include all options                           [boolean]
-  --underline, -u        Underline data (but not symbols)
+  --include, -i                Which data to print.
+                                              [array] [default: $ZINFO_DEFAULTS]
+  --exclude, -e                Data to not print         [array] [default: none]
+  --ignore-defaults, -I        Ignore "$ZINFO_DEFAULTS"                [boolean]
+  --all, -a                    Include all options                     [boolean]
+  --underline, -u              Underline data (but not symbols)
                                       [boolean] [default: $ZINFO_UNDERLINE_DATA]
-  --nerdfonts, --nf      Use NerdFont symbols
+  --nerdfonts, --nf            Use NerdFont symbols
                                            [boolean] [default: $ZINFO_NERDFONTS]
-  --options, --ls        List available options.                       [boolean]
-  --version, -v          Show version number                           [boolean]
-  --help                 Show help                                     [boolean]
+  --icons-secondary, --dimsym  Use a secondary color symbols
+                                     [boolean] [default: $ZINFO_ICONS_SECONDARY]
+  --options, --ls              List available options.                 [boolean]
+  --version, -v                Show version number                     [boolean]
+  --help                       Show help                               [boolean]
 ```
 
 <!-- END:usage -->
