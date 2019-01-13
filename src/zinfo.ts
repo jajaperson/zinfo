@@ -103,7 +103,11 @@ export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
 
 /** Zinfo Output Style Configoration */
 export interface ZinfoStyleInterface {
+  /** Underline data (but not symbols) */
   underlineData: boolean;
+  /** Use a secondary color symbols */
+  iconsSecondary: boolean;
+  /** Enable NerdFonts */
   nerdFonts: boolean;
 }
 
@@ -119,6 +123,7 @@ export async function zinfo(
 ): Promise<string[]> {
   // Optional styles
   const underline = optionalStyle(c.underline, style.underlineData);
+  const secondary = optionalStyle(c.dim, style.iconsSecondary);
 
   const zinfoArray: string[] = [];
 
@@ -134,7 +139,7 @@ export async function zinfo(
 
       zinfoArray.push(
         c.red(
-          `${style.nerdFonts ? "\ue0a0" : ">"} ${underline(
+          `${secondary(style.nerdFonts ? "\ue0a0" : ">")} ${underline(
             `${repo.branch + (repo.dirty ? c.dim("*") : "")} ${c.cyan(
               (repo.ahead ? "\u21E1" : "") + (repo.behind ? "\u21E3" : "")
             )}`
@@ -148,7 +153,9 @@ export async function zinfo(
       const { branch } = await gitStat(process.cwd());
 
       zinfoArray.push(
-        c.red(`${style.nerdFonts ? "\ue0a0" : ">"} ${underline(branch)}`)
+        c.red(
+          `${secondary(style.nerdFonts ? "\ue0a0" : ">")} ${underline(branch)}`
+        )
       );
     }
   }
@@ -162,7 +169,7 @@ export async function zinfo(
 
     zinfoArray.push(
       c.red(
-        `${style.nerdFonts ? "\uf417" : "\u29B5"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf417" : "\u29B5")} ${underline(
           `${subject} ${c.dim.italic(shortHash)}`
         )}`
       )
@@ -173,7 +180,7 @@ export async function zinfo(
 
     zinfoArray.push(
       c.red(
-        `${style.nerdFonts ? "\uf403" : "%"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf403" : "%")} ${underline(
           `${ahead} commits ahead of origin`
         )}`
       )
@@ -184,7 +191,7 @@ export async function zinfo(
 
     zinfoArray.push(
       c.red(
-        `${style.nerdFonts ? "\uf404" : "!"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf404" : "!")} ${underline(
           `${behind} commits behind origin`
         )}`
       )
@@ -193,7 +200,7 @@ export async function zinfo(
   if (include.indexOf("platform") > -1) {
     zinfoArray.push(
       c.yellow(
-        `${style.nerdFonts ? getOsSymbol() : "P"} ${underline(
+        `${secondary(style.nerdFonts ? getOsSymbol() : "P")} ${underline(
           process.platform
         )}`
       )
@@ -202,7 +209,7 @@ export async function zinfo(
   if (include.indexOf("user") > -1) {
     zinfoArray.push(
       c.greenBright(
-        `${style.nerdFonts ? "\uf841" : "\u2666"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf841" : "\u2666")} ${underline(
           userInfo().username
         )}`
       )
@@ -211,7 +218,7 @@ export async function zinfo(
   if (include.indexOf("time") > -1) {
     zinfoArray.push(
       c.redBright(
-        `${style.nerdFonts ? "\uf64f" : "T"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf64f" : "T")} ${underline(
           moment().format("h:mm:ss a")
         )}`
       )
@@ -220,7 +227,7 @@ export async function zinfo(
   if (include.indexOf("time-24") > -1) {
     zinfoArray.push(
       c.redBright(
-        `${style.nerdFonts ? "\uf64f" : "T"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf64f" : "T")} ${underline(
           moment().format("H:mm:ss")
         )}`
       )
@@ -229,7 +236,7 @@ export async function zinfo(
   if (include.indexOf("date") > -1) {
     zinfoArray.push(
       c.redBright(
-        `${style.nerdFonts ? "\uf5ec" : "D"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf5ec" : "D")} ${underline(
           moment().format("dddd, MMMM Do YYYY")
         )}`
       )
@@ -238,7 +245,7 @@ export async function zinfo(
   if (include.indexOf("date-time") > -1) {
     zinfoArray.push(
       c.redBright(
-        `${style.nerdFonts ? "\uf5ef" : "D"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf5ef" : "D")} ${underline(
           moment().format("dddd, MMMM Do YYYY, h:mm:ss a")
         )}`
       )
@@ -247,7 +254,7 @@ export async function zinfo(
   if (include.indexOf("date-time-24") > -1) {
     zinfoArray.push(
       c.redBright(
-        `${style.nerdFonts ? "\uf5ef" : "D"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf5ef" : "D")} ${underline(
           moment().format("dddd, MMMM Do YYYY, H:mm:ss")
         )}`
       )
@@ -256,7 +263,7 @@ export async function zinfo(
   if (include.indexOf("node-v") > -1) {
     zinfoArray.push(
       c.green(
-        `${style.nerdFonts ? "\ue24f" : "\u2B22"} ${underline(
+        `${secondary(style.nerdFonts ? "\ue24f" : "\u2B22")} ${underline(
           process.version.substring(1)
         )}`
       )
@@ -265,7 +272,7 @@ export async function zinfo(
   if (include.indexOf("uptime") > -1) {
     zinfoArray.push(
       c.magentaBright(
-        `${style.nerdFonts ? "\uf55d" : "U"} ${underline(
+        `${secondary(style.nerdFonts ? "\uf55d" : "U")} ${underline(
           moment.duration(sysUptime(), "seconds").format()
         )}`
       )

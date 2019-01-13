@@ -72,6 +72,13 @@ const argv = require("yargs")
     default: Boolean(Number(process.env.ZINFO_NERDFONTS)),
     defaultDescription: "$ZINFO_NERDFONTS",
   })
+  .option("icons-secondary", {
+    alias: "dimsym",
+    describe: "Use a secondary color symbols",
+    type: "boolean",
+    default: Boolean(Number(process.env.ZINFO_ICONS_SECONDARY)),
+    defaultDescription: "$ZINFO_ICONS_SECONDARY",
+  })
   .option("options", {
     alias: "ls",
     describe: "List available options.",
@@ -102,19 +109,16 @@ const argv = require("yargs")
 
 if (argv.options) {
   console.log(
-    `Valid options are:\n${
-      zinfoOptions
-        .map((o, i) =>
-          `- \`${o}\`: ${zinfoOptionsDesc[i]}`
-            .concat("\n")
-            .split(/(?![^\n]{1,69}$)([^\n]{1,69})\s/g)
-            .filter((_, i) => i % 2 === 1)
-            .map((s, i) => (i > 0 ? `  ${s}` : s))
-            .join("\n")
-        )
-        .join("\n")
-      // .replace(/(?![^\n]{1,71}$)([^\n]{1,71})\s/g, "$1\n")
-    }`
+    `Valid options are:\n${zinfoOptions
+      .map((o, i) =>
+        `- \`${o}\`: ${zinfoOptionsDesc[i]}`
+          .concat("\n")
+          .split(/(?![^\n]{1,69}$)([^\n]{1,69})\s/g)
+          .filter((_, i) => i % 2 === 1)
+          .map((s, i) => (i > 0 ? `  ${s}` : s))
+          .join("\n")
+      )
+      .join("\n")}`
   );
   process.exit(0);
 }
@@ -125,6 +129,7 @@ async function outputZinfo(argv) {
   console.log(
     (await zinfo(resolveArgs(argv), {
       underlineData: argv.underline,
+      iconsSecondary: argv["icons-secondary"],
       nerdFonts: argv.nerdfonts,
     })).join("\n")
   );
