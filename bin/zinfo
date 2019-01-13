@@ -102,9 +102,19 @@ const argv = require("yargs")
 
 if (argv.options) {
   console.log(
-    `Valid options are:\n${zinfoOptions
-      .map((o, i) => `- \`${o}\`: ${zinfoOptionsDesc[i]}`)
-      .join("\n")}`
+    `Valid options are:\n${
+      zinfoOptions
+        .map((o, i) =>
+          `- \`${o}\`: ${zinfoOptionsDesc[i]}`
+            .concat("\n")
+            .split(/(?![^\n]{1,71}$)([^\n]{1,71})\s/g)
+            .filter((_, i) => i % 2 === 1)
+            .map((s, i) => (i > 0 ? `  ${s}` : s))
+            .join("\n")
+        )
+        .join("\n")
+      // .replace(/(?![^\n]{1,71}$)([^\n]{1,71})\s/g, "$1\n")
+    }`
   );
   process.exit(0);
 }
