@@ -23,7 +23,9 @@
  * SOFTWARE.
  */
 
-const { negate, take, kebabCase, without, uniq } = require("lodash");
+const { negate, kebabCase, without, uniq } = require("lodash");
+
+const { toSentence } = require("../lib/utilities");
 
 const {
   zinfo,
@@ -127,7 +129,7 @@ outputZinfo(argv);
 
 async function outputZinfo(argv) {
   console.log(
-    (await zinfo(resolveArgs(argv), {
+    (await zinfo(resolveArgs(argv), process.cwd(), {
       underlineData: argv.underline,
       iconsSecondary: argv["icons-secondary"],
       nerdFonts: argv.nerdfonts,
@@ -147,12 +149,4 @@ function resolveArgs(argv) {
           ...argv.exclude.map(kebabCase)
         ).concat(...argv.include.map(kebabCase))
       );
-}
-
-function toSentence(array) {
-  return array.length > 1
-    ? take(array, array.length - 1)
-        .join(", ")
-        .concat(`, and ${array[array.length - 1]}`)
-    : array[0];
 }

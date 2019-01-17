@@ -22,13 +22,13 @@
  */
 
 import { uptime as sysUptime, userInfo } from "os";
-import { dirname, join as joinPath, resolve as resolvePath } from "path";
 
 import c from "chalk";
 import * as execa from "execa";
-import { identity } from "lodash";
 import * as moment from "moment";
 import "moment-duration-format";
+
+import { homeRelativePath, optionalStyle } from "./utilities";
 
 /** Zinfo Options Type */
 export type ZinfoOptionsType =
@@ -117,7 +117,12 @@ export interface IZinfoStyle {
  */
 export async function zinfo(
   include: ZinfoOptionsType[],
-  style: IZinfoStyle
+  cwd: string = process.cwd(),
+  style: IZinfoStyle = {
+    underlineData: false,
+    iconsSecondary: false,
+    nerdFonts: false,
+  }
 ): Promise<string[]> {
   // Optional styles
   const underline = optionalStyle(c.underline, style.underlineData);
@@ -126,14 +131,14 @@ export async function zinfo(
   const zinfoArray: string[] = [];
 
   if (include.indexOf("cwd-path") > -1) {
-    zinfoArray.push(c.blue(underline(homeRelativePath(process.cwd()))));
+    zinfoArray.push(c.blue(underline(homeRelativePath(cwd))));
   }
   if (include.indexOf("cwd-path-absolute") > -1) {
-    zinfoArray.push(c.blue(underline(process.cwd())));
+    zinfoArray.push(c.blue(underline(cwd)));
   }
   if (include.indexOf("git-overview") > -1) {
-    if (await isGitRepository(process.cwd())) {
-      const repo = await gitStat(process.cwd());
+    if (await isGitRepository(cwd)) {
+      const repo = await gitStat(cwd);
 
       zinfoArray.push(
         c.red(
@@ -147,8 +152,8 @@ export async function zinfo(
     }
   }
   if (include.indexOf("git-branch") > -1) {
-    if (await isGitRepository(process.cwd())) {
-      const { branch } = await gitStat(process.cwd());
+    if (await isGitRepository(cwd)) {
+      const { branch } = await gitStat(cwd);
 
       zinfoArray.push(
         c.red(
@@ -158,8 +163,8 @@ export async function zinfo(
     }
   }
   if (include.indexOf("git-last-commit") > -1) {
-    if (await isGitRepository(process.cwd())) {
-      if ((await commitCount(process.cwd())) > 0) {
+    if (await isGitRepository(cwd)) {
+      if ((await commitCount(cwd)) > 0) {
         const [shortHash, subject] = (await execa.stdout("git", [
           "--no-pager",
           "log",
@@ -178,8 +183,8 @@ export async function zinfo(
     }
   }
   if (include.indexOf("git-ahead") > -1) {
-    if (await isGitRepository(process.cwd())) {
-      const { ahead } = await gitStat(process.cwd());
+    if (await isGitRepository(cwd)) {
+      const { ahead } = await gitStat(cwd);
 
       zinfoArray.push(
         c.red(
@@ -191,8 +196,8 @@ export async function zinfo(
     }
   }
   if (include.indexOf("git-behind") > -1) {
-    if (await isGitRepository(process.cwd())) {
-      const { behind } = await gitStat(process.cwd());
+    if (await isGitRepository(cwd)) {
+      const { behind } = await gitStat(cwd);
 
       zinfoArray.push(
         c.red(
@@ -289,65 +294,13 @@ export async function zinfo(
 }
 
 /**
- * ## Home Relative Path Converter
- * Converts `filePath` to its home-relatave form, using the tilde (`~`) for the
- * home directory, and a tilde followed by the user's name for the home directory
- * of other users (e.g. `~johnny.appleseed/Desktop`).
- *
- * @param filePath - Path to be converted.
- * @returns The converted path.
- * @example
- * import { homeRelativePath } from "zinfo";
- *
- * console.log(process.cwd())
- * // => "/Users/johnny.appleseed/Documents"
- * console.log(homeRelativePath(process.cwd()))
- * // => "~/Documents"
- */
-export function homeRelativePath(filePath: string): string {
-  const resolvedFilePath = resolvePath(filePath);
-  const homeDir = userInfo().homedir;
-  const userParent = dirname(homeDir) + "/";
-
-  return resolvedFilePath.startsWith(homeDir)
-    ? resolvedFilePath.replace(homeDir, "~")
-    : resolvedFilePath.startsWith(userParent)
-    ? filePath.replace(userParent, "~")
-    : filePath;
-}
-
-/**
- * ## Optional Style
- * Apply a style (like a chalk color) to a string only if `option` is true.
- *
- * @param style - The style to use.
- * @param option - The option that determines whether to use the style or not.
- * @returns The altered style function.
- * @example
- * import { optionalStyle } from "zinfo";
- * import * as chalk from "chalk";
- *
- * const colored = true;
- *
- * console.log(
- *   optionalStyle(chalk.red, colored)("Red text.")
- * );
- */
-export function optionalStyle(
-  style: (...str: any[]) => string,
-  option: boolean
-): (...str: any[]) => string {
-  return (...str) => (option ? style(str) : identity(str.join(" ")));
-}
-
-/**
  * ## Os Symbol
  * Returns a NerdFonts symbol for the operating system. Currently has an icon
  * for MacOS, Windows and Linux (nothing more specific).
  *
  * @returns The symbol for your OS.
  */
-export function getOsSymbol(): string {
+export function getOsSymbol(platform: string = process.platform): string {
   switch (process.platform) {
     case "darwin":
       return "\uf179";
