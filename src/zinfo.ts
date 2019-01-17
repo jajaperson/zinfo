@@ -304,19 +304,15 @@ export function getOsSymbol(platform: string = process.platform): string {
   switch (process.platform) {
     case "darwin":
       return "\uf179";
-      break;
 
     case "linux":
       return "\uf17c";
-      break;
 
     case "win32":
       return "\uf17a";
-      break;
 
     default:
       return "\uf109";
-      break;
   }
 }
 
