@@ -28,9 +28,13 @@
     "bin": "bin"
   },
   "scripts": {
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\" \"bin/**/*.ts\" \"bin/**/*.js\"",
     "lint": "tslint --project .",
     "prepare": "tsc",
+    "prepublishOnly": "npm test && npm run build",
     "release": "np",
+    "pretest": "npm run lint",
     "test": "jest",
     "version": "./scripts/update-readme && git add README.md"
   },
