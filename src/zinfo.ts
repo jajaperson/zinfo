@@ -326,11 +326,13 @@ export function getOsSymbol(platform: string = process.platform): string {
  *
  * @param directory - The directory to check
  */
-export async function isGitRepository(directory: string): Promise<boolean> {
+export async function isGitRepository(
+  directory: string = process.cwd()
+): Promise<boolean> {
   let isGit = true;
 
   try {
-    await execa("git", ["status"]);
+    await execa("git", ["status"], { cwd: directory });
   } catch (err) {
     isGit = false;
   }
@@ -345,8 +347,14 @@ export async function isGitRepository(directory: string): Promise<boolean> {
  * @param repository - The repository to check
  * @returns The number of commits
  */
-export async function commitCount(repository: string): Promise<number> {
-  return Number(await execa.stdout("git", ["rev-list", "--all", "--count"]));
+export async function commitCount(
+  repository: string = process.cwd()
+): Promise<number> {
+  return Number(
+    await execa.stdout("git", ["rev-list", "--all", "--count"], {
+      cwd: repository,
+    })
+  );
 }
 
 /** Git Stat Interface */
@@ -375,53 +383,77 @@ export interface IGitStat {
  *
  * @param repository - The path to the repository to get information about.
  */
-export async function gitStat(repository: string): Promise<IGitStat> {
+export async function gitStat(
+  repository: string = process.cwd()
+): Promise<IGitStat> {
   if (await isGitRepository(repository)) {
     const hasOrigin =
-      (await execa.stdout("git", ["remote"])).search("origin") > -1;
+      (await execa.stdout("git", ["remote"], { cwd: repository })).search(
+        "origin"
+      ) > -1;
 
     if ((await commitCount(repository)) > 0) {
-      const branch = await execa.stdout("git", [
-        "rev-parse",
-        "--abbrev-ref",
-        "HEAD",
-      ]);
+      const branch = await execa.stdout(
+        "git",
+        ["rev-parse", "--abbrev-ref", "HEAD"],
+        { cwd: repository }
+      );
+
       const dirty =
-        (await execa.stdout("git", ["status", "--porcelain"])).length > 0;
+        (await execa.stdout("git", ["status", "--porcelain"], {
+          cwd: repository,
+        })).length > 0;
+
       const ahead = hasOrigin
         ? Number(
-            await execa.stdout("git", [
-              "rev-list",
-              "--left-only",
-              "--count",
-              `${branch}...origin/${branch}`,
-            ])
+            await execa.stdout(
+              "git",
+              [
+                "rev-list",
+                "--left-only",
+                "--count",
+                `${branch}...origin/${branch}`,
+              ],
+              { cwd: repository }
+            )
           )
         : 0;
+
       const behind = hasOrigin
         ? Number(
-            await execa.stdout("git", [
-              "rev-list",
-              "--right-only",
-              "--count",
-              `${branch}...origin/${branch}`,
-            ])
+            await execa.stdout(
+              "git",
+              [
+                "rev-list",
+                "--right-only",
+                "--count",
+                `${branch}...origin/${branch}`,
+              ],
+              { cwd: repository }
+            )
           )
         : 0;
+
       return { branch, dirty, ahead, behind };
     } else {
       const branch = "master";
       const dirty =
-        (await execa.stdout("git", ["status", "--porcelain"])).length > 0;
+        (await execa.stdout("git", ["status", "--porcelain"], {
+          cwd: repository,
+        })).length > 0;
       const ahead = 0;
       const behind = hasOrigin
         ? Number(
-            await execa.stdout("git", [
-              "rev-list",
-              "--left-only",
-              "--count",
-              `${branch}...origin/${branch}`,
-            ])
+            await execa.stdout(
+              "git",
+              [
+                "rev-list",
+                "--left-only",
+                "--count",
+                `${branch}...origin/${branch}`,
+              ],
+              { cwd: repository }
+            )
           )
         : 0;
 
