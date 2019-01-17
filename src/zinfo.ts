@@ -340,7 +340,7 @@ export async function isGitRepository(
  * ## Repository Commit Count
  * Get the number of commits a given repository's current branch has.
  *
- * @param repository - The repository to check
+ * @param repository - The local repository to check
  * @returns The number of commits
  */
 export async function commitCount(
@@ -350,6 +350,30 @@ export async function commitCount(
     await execa.stdout("git", ["rev-list", "--all", "--count"], {
       cwd: repository,
     })
+  );
+}
+
+export async function remoteBranchExists(
+  repository: string = process.cwd(),
+  branch: string = "current",
+  remote: string = "origin"
+): Promise<boolean> {
+  if (branch === "current") {
+    branch = await execa.stdout("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+      cwd: repository,
+    });
+  }
+
+  return (
+    (await execa.stdout(
+      "git",
+      ["--no-pager", "branch", "--remotes", "--format=%(refname:short)"],
+      {
+        cwd: repository,
+      }
+    ))
+      .split("\n")
+      .indexOf(`${remote}/${branch}`) > -1
   );
 }
 
@@ -400,22 +424,28 @@ export async function gitStat(
           cwd: repository,
         })).length > 0;
 
+      const freshBranch = hasOrigin
+        ? !(await remoteBranchExists(repository, branch))
+        : true;
+
       const ahead = hasOrigin
-        ? Number(
-            await execa.stdout(
-              "git",
-              [
-                "rev-list",
-                "--left-only",
-                "--count",
-                `${branch}...origin/${branch}`,
-              ],
-              { cwd: repository }
+        ? !freshBranch
+          ? Number(
+              await execa.stdout(
+                "git",
+                [
+                  "rev-list",
+                  "--left-only",
+                  "--count",
+                  `${branch}...origin/${branch}`,
+                ],
+                { cwd: repository }
+              )
             )
-          )
+          : 1
         : 0;
 
-      const behind = hasOrigin
+      const behind = !freshBranch
         ? Number(
             await execa.stdout(
               "git",
