@@ -21,16 +21,14 @@
  * SOFTWARE.
  */
 
-import { dirname, resolve as resolvePath, join as joinPath } from "path";
 import { uptime as sysUptime, userInfo } from "os";
+import { dirname, join as joinPath, resolve as resolvePath } from "path";
 
-import * as execa from "execa";
-import * as moment from "moment";
-import { pathExists } from "fs-extra";
-import * as globby from "globby";
-import "moment-duration-format";
 import c from "chalk";
+import * as execa from "execa";
 import { identity } from "lodash";
+import * as moment from "moment";
+import "moment-duration-format";
 
 /** Zinfo Options Type */
 export type ZinfoOptionsType =
@@ -102,7 +100,7 @@ export function isZinfoOptionsType(arg: any): arg is ZinfoOptionsType {
 }
 
 /** Zinfo Output Style Configoration */
-export interface ZinfoStyleInterface {
+export interface IZinfoStyle {
   /** Underline data (but not symbols) */
   underlineData: boolean;
   /** Use a secondary color symbols */
@@ -119,7 +117,7 @@ export interface ZinfoStyleInterface {
  */
 export async function zinfo(
   include: ZinfoOptionsType[],
-  style: ZinfoStyleInterface
+  style: IZinfoStyle
 ): Promise<string[]> {
   // Optional styles
   const underline = optionalStyle(c.underline, style.underlineData);
@@ -160,42 +158,50 @@ export async function zinfo(
     }
   }
   if (include.indexOf("git-last-commit") > -1) {
-    const [shortHash, subject] = (await execa.stdout("git", [
-      "--no-pager",
-      "log",
-      "-1",
-      "--format=%h:%s",
-    ])).split(":");
+    if (await isGitRepository(process.cwd())) {
+      if ((await commitCount(process.cwd())) > 0) {
+        const [shortHash, subject] = (await execa.stdout("git", [
+          "--no-pager",
+          "log",
+          "-1",
+          "--format=%h:%s",
+        ])).split(":");
 
-    zinfoArray.push(
-      c.red(
-        `${secondary(style.nerdFonts ? "\uf417" : "\u29B5")} ${underline(
-          `${subject} ${c.dim.italic(shortHash)}`
-        )}`
-      )
-    );
+        zinfoArray.push(
+          c.red(
+            `${secondary(style.nerdFonts ? "\uf417" : "\u29B5")} ${underline(
+              `${subject} ${c.dim.italic(shortHash)}`
+            )}`
+          )
+        );
+      }
+    }
   }
   if (include.indexOf("git-ahead") > -1) {
-    const { ahead } = await gitStat(process.cwd());
+    if (await isGitRepository(process.cwd())) {
+      const { ahead } = await gitStat(process.cwd());
 
-    zinfoArray.push(
-      c.red(
-        `${secondary(style.nerdFonts ? "\uf403" : "%")} ${underline(
-          `${ahead} commits ahead of origin`
-        )}`
-      )
-    );
+      zinfoArray.push(
+        c.red(
+          `${secondary(style.nerdFonts ? "\uf403" : "%")} ${underline(
+            `${ahead} commits ahead of origin`
+          )}`
+        )
+      );
+    }
   }
   if (include.indexOf("git-behind") > -1) {
-    const { behind } = await gitStat(process.cwd());
+    if (await isGitRepository(process.cwd())) {
+      const { behind } = await gitStat(process.cwd());
 
-    zinfoArray.push(
-      c.red(
-        `${secondary(style.nerdFonts ? "\uf404" : "!")} ${underline(
-          `${behind} commits behind origin`
-        )}`
-      )
-    );
+      zinfoArray.push(
+        c.red(
+          `${secondary(style.nerdFonts ? "\uf404" : "!")} ${underline(
+            `${behind} commits behind origin`
+          )}`
+        )
+      );
+    }
   }
   if (include.indexOf("platform") > -1) {
     zinfoArray.push(
@@ -312,7 +318,7 @@ export function homeRelativePath(filePath: string): string {
 
 /**
  * ## Optional Style
- * Apply a style (like a chalk colour) to a string only if `option` is true.
+ * Apply a style (like a chalk color) to a string only if `option` is true.
  *
  * @param style - The style to use.
  * @param option - The option that determines whether to use the style or not.
@@ -367,12 +373,31 @@ export function getOsSymbol(): string {
  *
  * @param directory - The directory to check
  */
-export async function isGitRepository(directory): Promise<boolean> {
-  return await pathExists(joinPath(directory, "./.git/HEAD"));
+export async function isGitRepository(directory: string): Promise<boolean> {
+  let isGit = true;
+
+  try {
+    await execa("git", ["status"]);
+  } catch (err) {
+    isGit = false;
+  }
+
+  return isGit;
+}
+
+/**
+ * ## Repository Commit Count
+ * Get the number of commits a given repository's current branch has.
+ *
+ * @param repository - The repository to check
+ * @returns The number of commits
+ */
+export async function commitCount(repository: string): Promise<number> {
+  return Number(await execa.stdout("git", ["rev-list", "--all", "--count"]));
 }
 
 /** Git Stat Interface */
-export interface GitStatInterface {
+export interface IGitStat {
   /** Current branch */
   branch: string;
   /** Whether the selected branch is dirty */
@@ -397,12 +422,12 @@ export interface GitStatInterface {
  *
  * @param repository - The path to the repository to get information about.
  */
-export async function gitStat(repository: string): Promise<GitStatInterface> {
+export async function gitStat(repository: string): Promise<IGitStat> {
   if (await isGitRepository(repository)) {
     const hasOrigin =
       (await execa.stdout("git", ["remote"])).search("origin") > -1;
 
-    if (await pathExists(joinPath(repository, "./.git/index"))) {
+    if ((await commitCount(repository)) > 0) {
       const branch = await execa.stdout("git", [
         "rev-parse",
         "--abbrev-ref",
@@ -433,7 +458,8 @@ export async function gitStat(repository: string): Promise<GitStatInterface> {
       return { branch, dirty, ahead, behind };
     } else {
       const branch = "master";
-      const dirty = (await globby(["*", "!.git"])).length > 0;
+      const dirty =
+        (await execa.stdout("git", ["status", "--porcelain"])).length > 0;
       const ahead = 0;
       const behind = hasOrigin
         ? Number(
