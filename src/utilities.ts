@@ -95,10 +95,18 @@ export function optionalStyle(
  * @param array - The array to convert
  * @returns The sentence
  */
-export function toSentence(array: any[]) {
-  return array.length > 1
-    ? take(array, array.length - 1)
-        .join(", ")
-        .concat(`, and ${array[array.length - 1]}`)
-    : array[0];
+export function toSentence(array: any[], wrapValues = true) {
+  if (wrapValues) {
+    array = array.map(i => (typeof i === "string" ? `"${i}"` : `\`${i}\``));
+  }
+
+  return String(
+    array.length > 1
+      ? take(array, array.length - 1)
+          .join(", ")
+          .concat(
+            `${array.length > 2 ? "," : ""} and ${array[array.length - 1]}`
+          )
+      : array[0]
+  );
 }

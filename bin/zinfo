@@ -96,9 +96,9 @@ const argv = require("yargs")
     } else {
       const plural = invalidOptions.length > 1;
       throw new Error(
-        `${toSentence(invalidOptions.map(i => `"${i}"`))} ${
-          plural ? "are" : "is"
-        } not ${plural ? "" : "a "}valid option${
+        `${toSentence(invalidOptions)} ${plural ? "are" : "is"} not ${
+          plural ? "" : "a "
+        }valid option${
           plural ? "s" : ""
         }. To see a list of valid options, type \`zinfo --options\`.`
       );
