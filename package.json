@@ -1,6 +1,6 @@
 {
   "name": "zinfo-logger",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Quickly get information about the current directory, system, and node.",
   "keywords": [
     "info",
