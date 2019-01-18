@@ -28,7 +28,7 @@ import * as execa from "execa";
 import * as moment from "moment";
 import "moment-duration-format";
 
-import { homeRelativePath, optionalStyle } from "./utilities";
+import { homeRelativePath, optionalStyle, ensure } from "./utilities";
 
 /** Zinfo Options Type */
 export type ZinfoOptionsType =
@@ -130,6 +130,10 @@ export async function zinfo(
 
   const zinfoArray: string[] = [];
 
+  let repo: IGitStat;
+  let isGit: boolean;
+  let repoCommitCount: number;
+
   if (include.indexOf("cwd-path") > -1) {
     zinfoArray.push(c.blue(underline(homeRelativePath(cwd))));
   }
@@ -137,8 +141,9 @@ export async function zinfo(
     zinfoArray.push(c.blue(underline(cwd)));
   }
   if (include.indexOf("git-overview") > -1) {
-    if (await isGitRepository(cwd)) {
-      const repo = await gitStat(cwd);
+    isGit = await ensure(isGit, async () => await isGitRepository(cwd));
+    if (isGit) {
+      repo = await ensure(repo, async () => await gitStat(cwd));
 
       zinfoArray.push(
         c.red(
@@ -152,19 +157,27 @@ export async function zinfo(
     }
   }
   if (include.indexOf("git-branch") > -1) {
-    if (await isGitRepository(cwd)) {
-      const { branch } = await gitStat(cwd);
+    isGit = await ensure(isGit, async () => await isGitRepository(cwd));
+    if (isGit) {
+      repo = await ensure(repo, async () => await gitStat(cwd));
 
       zinfoArray.push(
         c.red(
-          `${secondary(style.nerdFonts ? "\ue0a0" : ">")} ${underline(branch)}`
+          `${secondary(style.nerdFonts ? "\ue0a0" : ">")} ${underline(
+            repo.branch
+          )}`
         )
       );
     }
   }
   if (include.indexOf("git-last-commit") > -1) {
-    if (await isGitRepository(cwd)) {
-      if ((await commitCount(cwd)) > 0) {
+    isGit = await ensure(isGit, async () => await isGitRepository(cwd));
+    if (isGit) {
+      repoCommitCount = await ensure(
+        repoCommitCount,
+        async () => await commitCount(cwd)
+      );
+      if (repoCommitCount > 0) {
         const [shortHash, subject] = (await execa.stdout("git", [
           "--no-pager",
           "log",

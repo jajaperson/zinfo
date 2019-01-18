@@ -24,6 +24,7 @@
 import { identity, take, escapeRegExp } from "lodash";
 import { userInfo } from "os";
 import { dirname, resolve as resolvePath } from "path";
+import { types } from "util";
 
 /**
  * ## Home Relative Path Converter
@@ -109,4 +110,31 @@ export function toSentence(array: any[], wrapValues = true) {
           )
       : array[0]
   );
+}
+
+/**
+ * ## Ensure
+ * Ensures that an object has been initialized (useful for lazy loading).
+ *
+ * @param object - The object to check
+ * @param callback - A function that returns the initialized object
+ * asynchronously.
+ * @returns The initialized object
+ */
+export async function ensure<T>(
+  object: T,
+  callback: () => Promise<T>
+): Promise<T> {
+  return object == undefined ? await callback() : object;
+}
+
+/**
+ * ## Ensure Sync
+ * See {@link ensure}.
+ *
+ * @param object - The object to check
+ * @param callback A function that returns the initialized object
+ */
+export function ensureSync<T>(object: T, callback: () => T): T {
+  return object == undefined ? callback() : object;
 }

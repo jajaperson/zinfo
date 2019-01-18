@@ -2,7 +2,13 @@ import { curry } from "lodash";
 import { userInfo } from "os";
 import { join } from "path";
 
-import { homeRelativePath, optionalStyle, toSentence } from "./utilities";
+import {
+  homeRelativePath,
+  optionalStyle,
+  toSentence,
+  ensure,
+  ensureSync,
+} from "./utilities";
 
 describe("homeRelativePath", () => {
   it("formats home-relative paths correctly", () => {
@@ -81,6 +87,40 @@ describe("toSentence", () => {
       const arr = [1, 2, 3];
       expect(toSentence(arr)).toBe("`1`, `2`, and `3`");
       expect(toSentence(arr, false)).toBe("1, 2, and 3");
+    });
+  });
+});
+
+describe("ensure", () => {
+  describe("async", () => {
+    const initializer = async () => "initialized";
+
+    it("returns an initialized object on an undefined value", async () => {
+      let object: string;
+      object = await ensure(object, initializer);
+      expect(object).toBe("initialized");
+    });
+
+    it("returns the same object on a predefined value", async () => {
+      let object = "preinitialized";
+      object = await ensure(object, initializer);
+      expect(object).toBe("preinitialized");
+    });
+  });
+
+  describe("sync", () => {
+    const initializer = () => "initialized";
+
+    it("returns an initialized object on an undefined value", () => {
+      let object: string;
+      object = ensureSync(object, initializer);
+      expect(object).toBe("initialized");
+    });
+
+    it("returns the same object on a predefined value", () => {
+      let object = "preinitialized";
+      object = ensureSync(object, initializer);
+      expect(object).toBe("preinitialized");
     });
   });
 });
