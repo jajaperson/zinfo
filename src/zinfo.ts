@@ -23,7 +23,7 @@
 
 import { uptime as sysUptime, userInfo } from "os";
 
-import c from "chalk";
+import c = require("chalk");
 import * as execa from "execa";
 import * as moment from "moment";
 import "moment-duration-format";

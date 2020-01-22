@@ -39,7 +39,7 @@
     "version": "./scripts/update-readme && git add README.md"
   },
   "dependencies": {
-    "chalk": "^2.4.1",
+    "chalk": "^3.0.0",
     "execa": "^1.0.0",
     "lodash": "^4.17.14",
     "moment": "^2.24.0",
