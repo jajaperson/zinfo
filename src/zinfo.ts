@@ -178,12 +178,9 @@ export async function zinfo(
         async () => await commitCount(cwd)
       );
       if (repoCommitCount > 0) {
-        const [shortHash, subject] = (await execa.stdout("git", [
-          "--no-pager",
-          "log",
-          "-1",
-          "--format=%h:%s",
-        ])).split(":");
+        const [shortHash, subject] = (
+          await execa("git", ["--no-pager", "log", "-1", "--format=%h:%s"])
+        ).stdout.split(":");
 
         zinfoArray.push(
           c.red(
@@ -360,9 +357,11 @@ export async function commitCount(
   repository: string = process.cwd()
 ): Promise<number> {
   return Number(
-    await execa.stdout("git", ["rev-list", "--all", "--count"], {
-      cwd: repository,
-    })
+    (
+      await execa("git", ["rev-list", "--all", "--count"], {
+        cwd: repository,
+      })
+    ).stdout
   );
 }
 
@@ -372,19 +371,23 @@ export async function remoteBranchExists(
   remote: string = "origin"
 ): Promise<boolean> {
   if (branch === "current") {
-    branch = await execa.stdout("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
-      cwd: repository,
-    });
+    branch = (
+      await execa("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+        cwd: repository,
+      })
+    ).stdout;
   }
 
   return (
-    (await execa.stdout(
-      "git",
-      ["--no-pager", "branch", "--remotes", "--format=%(refname:short)"],
-      {
-        cwd: repository,
-      }
-    ))
+    (
+      await execa(
+        "git",
+        ["--no-pager", "branch", "--remotes", "--format=%(refname:short)"],
+        {
+          cwd: repository,
+        }
+      )
+    ).stdout
       .split("\n")
       .indexOf(`${remote}/${branch}`) > -1
   );
@@ -421,21 +424,23 @@ export async function gitStat(
 ): Promise<IGitStat> {
   if (await isGitRepository(repository)) {
     const hasOrigin =
-      (await execa.stdout("git", ["remote"], { cwd: repository })).search(
+      (await execa("git", ["remote"], { cwd: repository })).stdout.search(
         "origin"
       ) > -1;
 
     if ((await commitCount(repository)) > 0) {
-      const branch = await execa.stdout(
-        "git",
-        ["rev-parse", "--abbrev-ref", "HEAD"],
-        { cwd: repository }
-      );
+      const branch = (
+        await execa("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+          cwd: repository,
+        })
+      ).stdout;
 
       const dirty =
-        (await execa.stdout("git", ["status", "--porcelain"], {
-          cwd: repository,
-        })).length > 0;
+        (
+          await execa("git", ["status", "--porcelain"], {
+            cwd: repository,
+          })
+        ).stdout.length > 0;
 
       const freshBranch = hasOrigin
         ? !(await remoteBranchExists(repository, branch))
@@ -444,7 +449,53 @@ export async function gitStat(
       const ahead = hasOrigin
         ? !freshBranch
           ? Number(
-              await execa.stdout(
+              (
+                await execa(
+                  "git",
+                  [
+                    "rev-list",
+                    "--left-only",
+                    "--count",
+                    `${branch}...origin/${branch}`,
+                  ],
+                  { cwd: repository }
+                )
+              ).stdout
+            )
+          : 1
+        : 0;
+
+      const behind = !freshBranch
+        ? Number(
+            (
+              await execa(
+                "git",
+                [
+                  "rev-list",
+                  "--right-only",
+                  "--count",
+                  `${branch}...origin/${branch}`,
+                ],
+                { cwd: repository }
+              )
+            ).stdout
+          )
+        : 0;
+
+      return { branch, dirty, ahead, behind };
+    } else {
+      const branch = "master";
+      const dirty =
+        (
+          await execa("git", ["status", "--porcelain"], {
+            cwd: repository,
+          })
+        ).stdout.length > 0;
+      const ahead = 0;
+      const behind = hasOrigin
+        ? Number(
+            (
+              await execa(
                 "git",
                 [
                   "rev-list",
@@ -454,45 +505,7 @@ export async function gitStat(
                 ],
                 { cwd: repository }
               )
-            )
-          : 1
-        : 0;
-
-      const behind = !freshBranch
-        ? Number(
-            await execa.stdout(
-              "git",
-              [
-                "rev-list",
-                "--right-only",
-                "--count",
-                `${branch}...origin/${branch}`,
-              ],
-              { cwd: repository }
-            )
-          )
-        : 0;
-
-      return { branch, dirty, ahead, behind };
-    } else {
-      const branch = "master";
-      const dirty =
-        (await execa.stdout("git", ["status", "--porcelain"], {
-          cwd: repository,
-        })).length > 0;
-      const ahead = 0;
-      const behind = hasOrigin
-        ? Number(
-            await execa.stdout(
-              "git",
-              [
-                "rev-list",
-                "--left-only",
-                "--count",
-                `${branch}...origin/${branch}`,
-              ],
-              { cwd: repository }
-            )
+            ).stdout
           )
         : 0;
 

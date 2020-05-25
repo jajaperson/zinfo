@@ -24,7 +24,6 @@
 import { identity, take, escapeRegExp } from "lodash";
 import { userInfo } from "os";
 import { dirname, resolve as resolvePath } from "path";
-import { types } from "util";
 
 /**
  * ## Home Relative Path Converter
@@ -98,7 +97,7 @@ export function optionalStyle(
  */
 export function toSentence(array: any[], wrapValues = true) {
   if (wrapValues) {
-    array = array.map(i => (typeof i === "string" ? `"${i}"` : `\`${i}\``));
+    array = array.map((i) => (typeof i === "string" ? `"${i}"` : `\`${i}\``));
   }
 
   return String(

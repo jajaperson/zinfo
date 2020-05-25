@@ -36,11 +36,8 @@ describe("homeRelativePath", () => {
 
 test("optionalStyle", () => {
   const cOptionalStyle = curry(optionalStyle);
-  const optReverse = cOptionalStyle(str =>
-    String(str)
-      .split("")
-      .reverse()
-      .join("")
+  const optReverse = cOptionalStyle((str) =>
+    String(str).split("").reverse().join("")
   );
 
   expect(optReverse(true)("dog")).toBe("god");
